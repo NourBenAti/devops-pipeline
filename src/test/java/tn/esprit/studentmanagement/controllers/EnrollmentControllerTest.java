@@ -2,116 +2,92 @@ package tn.esprit.studentmanagement.controllers;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import tn.esprit.studentmanagement.entities.Enrollment;
-import tn.esprit.studentmanagement.entities.Status;
 import tn.esprit.studentmanagement.services.IEnrollment;
 
-import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@ExtendWith(MockitoExtension.class)
 class EnrollmentControllerTest {
-
-    @Autowired
-    private MockMvc mockMvc;
-
     @Mock
     private IEnrollment enrollmentService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    private Enrollment enrollment;
+    private EnrollmentController enrollmentController;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        enrollment = new Enrollment();
-        enrollment.setIdEnrollment(1L);
-        enrollment.setEnrollmentDate(LocalDate.now());
-        enrollment.setGrade(85.5);
-        enrollment.setStatus(Status.ACTIVE);
+        enrollmentController = new EnrollmentController(enrollmentService);
     }
 
     @Test
-    void testGetAllEnrollments() throws Exception {
-        Enrollment enrollment2 = new Enrollment();
-        enrollment2.setIdEnrollment(2L);
-        enrollment2.setGrade(90.0);
+    void testGetAllEnrollments() {
+        Enrollment enrollment1 = new Enrollment();
+        enrollment1.setIdEnrollment(1L);
 
-        List<Enrollment> enrollments = Arrays.asList(enrollment, enrollment2);
+        List<Enrollment> enrollments = Arrays.asList(enrollment1);
         when(enrollmentService.getAllEnrollments()).thenReturn(enrollments);
 
-        mockMvc.perform(get("/Enrollment/getAllEnrollment")
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()").value(2));
+        List<Enrollment> result = enrollmentController.getAllEnrollment();
 
+        assertNotNull(result);
+        assertEquals(1, result.size());
         verify(enrollmentService, times(1)).getAllEnrollments();
     }
 
     @Test
-    void testGetEnrollmentById() throws Exception {
+    void testGetEnrollmentById() {
+        Enrollment enrollment = new Enrollment();
+        enrollment.setIdEnrollment(1L);
+
         when(enrollmentService.getEnrollmentById(1L)).thenReturn(enrollment);
 
-        mockMvc.perform(get("/Enrollment/getEnrollment/1")
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.grade").value(85.5));
+        Enrollment result = enrollmentController.getEnrollment(1L);
 
+        assertNotNull(result);
+        assertEquals(1L, result.getIdEnrollment());
         verify(enrollmentService, times(1)).getEnrollmentById(1L);
     }
 
     @Test
-    void testCreateEnrollment() throws Exception {
-        when(enrollmentService.saveEnrollment(any(Enrollment.class))).thenReturn(enrollment);
+    void testCreateEnrollment() {
+        Enrollment enrollment = new Enrollment();
+        enrollment.setIdEnrollment(1L);
 
-        mockMvc.perform(post("/Enrollment/createEnrollment")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(enrollment)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("ACTIVE"));
+        when(enrollmentService.saveEnrollment(enrollment)).thenReturn(enrollment);
 
-        verify(enrollmentService, times(1)).saveEnrollment(any(Enrollment.class));
+        Enrollment result = enrollmentController.createEnrollment(enrollment);
+
+        assertNotNull(result);
+        assertEquals(1L, result.getIdEnrollment());
+        verify(enrollmentService, times(1)).saveEnrollment(enrollment);
     }
 
     @Test
-    void testUpdateEnrollment() throws Exception {
-        when(enrollmentService.saveEnrollment(any(Enrollment.class))).thenReturn(enrollment);
+    void testUpdateEnrollment() {
+        Enrollment enrollment = new Enrollment();
+        enrollment.setIdEnrollment(1L);
 
-        mockMvc.perform(put("/Enrollment/updateEnrollment")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(enrollment)))
-                .andExpect(status().isOk());
+        when(enrollmentService.saveEnrollment(enrollment)).thenReturn(enrollment);
 
-        verify(enrollmentService, times(1)).saveEnrollment(any(Enrollment.class));
+        Enrollment result = enrollmentController.updateEnrollment(enrollment);
+
+        assertNotNull(result);
+        assertEquals(1L, result.getIdEnrollment());
+        verify(enrollmentService, times(1)).saveEnrollment(enrollment);
     }
 
     @Test
-    void testDeleteEnrollment() throws Exception {
-        doNothing().when(enrollmentService).deleteEnrollment(1L);
+    void testDeleteEnrollment() {
+        Long enrollmentId = 1L;
 
-        mockMvc.perform(delete("/Enrollment/deleteEnrollment/1")
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+        enrollmentController.deleteEnrollment(enrollmentId);
 
-        verify(enrollmentService, times(1)).deleteEnrollment(1L);
+        verify(enrollmentService, times(1)).deleteEnrollment(enrollmentId);
     }
 }

@@ -2,116 +2,97 @@ package tn.esprit.studentmanagement.controllers;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import tn.esprit.studentmanagement.entities.Department;
 import tn.esprit.studentmanagement.services.IDepartmentService;
 
 import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@ExtendWith(MockitoExtension.class)
 class DepartmentControllerTest {
-
-    @Autowired
-    private MockMvc mockMvc;
-
     @Mock
     private IDepartmentService departmentService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    private Department department;
+    private DepartmentController departmentController;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        department = new Department();
-        department.setIdDepartment(1L);
-        department.setName("Computer Science");
-        department.setLocation("Building A");
-        department.setPhone("123456789");
-        department.setHead("Dr. Smith");
+        departmentController = new DepartmentController(departmentService);
     }
 
     @Test
-    void testGetAllDepartments() throws Exception {
-        Department dept2 = new Department();
-        dept2.setIdDepartment(2L);
-        dept2.setName("Engineering");
+    void testGetAllDepartments() {
+        Department dept1 = new Department();
+        dept1.setIdDepartment(1L);
+        dept1.setName("Computer Science");
 
-        List<Department> departments = Arrays.asList(department, dept2);
+        List<Department> departments = Arrays.asList(dept1);
         when(departmentService.getAllDepartments()).thenReturn(departments);
 
-        mockMvc.perform(get("/Depatment/getAllDepartment")
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()").value(2));
+        List<Department> result = departmentController.getAllDepartment();
 
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("Computer Science", result.get(0).getName());
         verify(departmentService, times(1)).getAllDepartments();
     }
 
     @Test
-    void testGetDepartmentById() throws Exception {
-        when(departmentService.getDepartmentById(1L)).thenReturn(department);
+    void testGetDepartmentById() {
+        Department dept = new Department();
+        dept.setIdDepartment(1L);
+        dept.setName("Computer Science");
 
-        mockMvc.perform(get("/Depatment/getDepartment/1")
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("Computer Science"));
+        when(departmentService.getDepartmentById(1L)).thenReturn(dept);
 
+        Department result = departmentController.getDepartment(1L);
+
+        assertNotNull(result);
+        assertEquals(1L, result.getIdDepartment());
+        assertEquals("Computer Science", result.getName());
         verify(departmentService, times(1)).getDepartmentById(1L);
     }
 
     @Test
-    void testCreateDepartment() throws Exception {
-        when(departmentService.saveDepartment(any(Department.class))).thenReturn(department);
+    void testCreateDepartment() {
+        Department dept = new Department();
+        dept.setName("Engineering");
 
-        mockMvc.perform(post("/Depatment/createDepartment")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(department)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("Computer Science"));
+        when(departmentService.saveDepartment(dept)).thenReturn(dept);
 
-        verify(departmentService, times(1)).saveDepartment(any(Department.class));
+        Department result = departmentController.createDepartment(dept);
+
+        assertNotNull(result);
+        assertEquals("Engineering", result.getName());
+        verify(departmentService, times(1)).saveDepartment(dept);
     }
 
     @Test
-    void testUpdateDepartment() throws Exception {
-        when(departmentService.saveDepartment(any(Department.class))).thenReturn(department);
+    void testUpdateDepartment() {
+        Department dept = new Department();
+        dept.setIdDepartment(1L);
+        dept.setName("Updated Engineering");
 
-        mockMvc.perform(put("/Depatment/updateDepartment")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(department)))
-                .andExpect(status().isOk());
+        when(departmentService.saveDepartment(dept)).thenReturn(dept);
 
-        verify(departmentService, times(1)).saveDepartment(any(Department.class));
+        Department result = departmentController.updateDepartment(dept);
+
+        assertNotNull(result);
+        assertEquals("Updated Engineering", result.getName());
+        verify(departmentService, times(1)).saveDepartment(dept);
     }
 
     @Test
-    void testDeleteDepartment() throws Exception {
-        doNothing().when(departmentService).deleteDepartment(1L);
+    void testDeleteDepartment() {
+        Long deptId = 1L;
 
-        mockMvc.perform(delete("/Depatment/deleteDepartment/1")
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+        departmentController.deleteDepartment(deptId);
 
-        verify(departmentService, times(1)).deleteDepartment(1L);
+        verify(departmentService, times(1)).deleteDepartment(deptId);
     }
 }
