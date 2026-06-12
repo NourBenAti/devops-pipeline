@@ -15,13 +15,19 @@ public class StudentController {
     IStudentService studentService;
 
     @GetMapping("/getAllStudents")
-    public List<Student> getAllStudents() { return studentService.getAllStudents(); }
+    public List<Student> getAllStudents() {
+        return studentService.getAllStudents();
+    }
 
     @GetMapping("/getStudent/{id}")
-    public Student getStudent(@PathVariable Long id) { return studentService.getStudentById(id); }
+    public Student getStudent(@PathVariable Long id) {
+        return studentService.getStudentById(id);
+    }
 
     @PostMapping("/createStudent")
-    public Student createStudent(@RequestBody Student student) { return studentService.saveStudent(student); }
+    public Student createStudent(@RequestBody Student student) {
+        return studentService.saveStudent(student);
+    }
 
     @PutMapping("/updateStudent")
     public Student updateStudent(@RequestBody Student student) {

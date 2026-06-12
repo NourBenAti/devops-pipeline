@@ -8,7 +8,6 @@ import tn.esprit.studentmanagement.repositories.DepartmentRepository;
 import java.util.List;
 
 @Service
-
 public class DepartmentService implements IDepartmentService {
     @Autowired
     DepartmentRepository departmentRepository;
