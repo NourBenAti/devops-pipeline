@@ -28,6 +28,6 @@ public class EnrollmentService implements IEnrollment {
 
     @Override
     public void deleteEnrollment(Long idEnrollment) {
-enrollmentRepository.deleteById(idEnrollment);
+        enrollmentRepository.deleteById(idEnrollment);
     }
 }

@@ -30,6 +30,6 @@ public class DepartmentService implements IDepartmentService {
 
     @Override
     public void deleteDepartment(Long idDepartment) {
-departmentRepository.deleteById(idDepartment);
+        departmentRepository.deleteById(idDepartment);
     }
 }
